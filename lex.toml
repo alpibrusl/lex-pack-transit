@@ -1,0 +1,10 @@
+[package]
+name        = "lex-pack-transit"
+version     = "0.1.0"
+description = "Scheduled-service (transit) domain pack — GTFS-style frequency-based trips, timetable expansion, and GTFS-RT-style adherence."
+
+[dependencies]
+lex-soft   = { git = "https://github.com/alpibrusl/lex-soft" }
+lex-web    = { git = "https://github.com/alpibrusl/lex-web" }
+lex-schema = { git = "https://github.com/alpibrusl/lex-schema" }
+lex-log    = { git = "https://github.com/alpibrusl/lex-log" }

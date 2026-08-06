@@ -7,3 +7,6 @@ description = "Scheduled-service (transit) domain pack — GTFS-style frequency-
 lex-soft   = { git = "https://github.com/alpibrusl/lex-soft" }
 lex-web    = { git = "https://github.com/alpibrusl/lex-web" }
 lex-schema = { git = "https://github.com/alpibrusl/lex-schema" }
+lex-agent  = { git = "https://github.com/alpibrusl/lex-agent" }
+lex-llm    = { git = "https://github.com/alpibrusl/lex-llm" }
+lex-spec   = { git = "https://github.com/alpibrusl/lex-spec" }

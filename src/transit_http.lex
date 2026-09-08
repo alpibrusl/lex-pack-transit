@@ -64,7 +64,7 @@ fn ensure_tables(db :: Db) -> [sql] Unit {
   ()
 }
 
-fn handle_import_trip(c :: ctx.Ctx, db :: Db) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] resp.Response {
+fn handle_import_trip(c :: ctx.Ctx, db :: Db) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] resp.Response {
   match jv.parse(c.body) {
     Err(_) => resp.bad_request("{\"error\":\"invalid json\"}"),
     Ok(j) => {
@@ -88,7 +88,7 @@ fn handle_import_trip(c :: ctx.Ctx, db :: Db) -> [io, time, crypto, random, sql,
   }
 }
 
-fn handle_list_trips(c :: ctx.Ctx, db :: Db) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] resp.Response {
+fn handle_list_trips(c :: ctx.Ctx, db :: Db) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] resp.Response {
   let tenant := ctx.header_or(c, "X-Tenant-Id", "demo")
   let rows :: Result[List[TripRow], SqlError] := sql.query(db, "SELECT trip_id, route, headsign, first_min, headway_min, last_min FROM transit_trips WHERE tenant = ? ORDER BY trip_id", [PStr(tenant)])
   match rows {
@@ -97,7 +97,7 @@ fn handle_list_trips(c :: ctx.Ctx, db :: Db) -> [io, time, crypto, random, sql, 
   }
 }
 
-fn handle_departures(c :: ctx.Ctx, db :: Db) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] resp.Response {
+fn handle_departures(c :: ctx.Ctx, db :: Db) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] resp.Response {
   match ctx.path_param(c, "id") {
     None => resp.bad_request("{\"error\":\"missing trip id\"}"),
     Some(id) => {
@@ -114,7 +114,7 @@ fn handle_departures(c :: ctx.Ctx, db :: Db) -> [io, time, crypto, random, sql, 
   }
 }
 
-fn handle_adherence(c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] resp.Response {
+fn handle_adherence(c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] resp.Response {
   match jv.parse(c.body) {
     Err(_) => resp.bad_request("{\"error\":\"invalid json\"}"),
     Ok(j) => {
@@ -128,16 +128,16 @@ fn handle_adherence(c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs
 
 fn mount(r :: router.Router, db :: Db) -> [sql] router.Router {
   let __t := ensure_tables(db)
-  let with_import := router.route_effectful(r, "POST", "/transit/trips", fn (c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] resp.Response {
+  let with_import := router.route_effectful(r, "POST", "/transit/trips", fn (c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] resp.Response {
     handle_import_trip(c, db)
   })
-  let with_list := router.route_effectful(with_import, "GET", "/transit/trips", fn (c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] resp.Response {
+  let with_list := router.route_effectful(with_import, "GET", "/transit/trips", fn (c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] resp.Response {
     handle_list_trips(c, db)
   })
-  let with_dep := router.route_effectful(with_list, "GET", "/transit/trips/:id/departures", fn (c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] resp.Response {
+  let with_dep := router.route_effectful(with_list, "GET", "/transit/trips/:id/departures", fn (c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] resp.Response {
     handle_departures(c, db)
   })
-  router.route_effectful(with_dep, "POST", "/transit/adherence", fn (c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] resp.Response {
+  router.route_effectful(with_dep, "POST", "/transit/adherence", fn (c :: ctx.Ctx) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] resp.Response {
     handle_adherence(c)
   })
 }
